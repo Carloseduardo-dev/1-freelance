@@ -150,7 +150,6 @@ function HeartParticle(isSmall = false, originX = null, originY = null) {
     ctx.save();
     ctx.globalAlpha = this.alpha;
     ctx.translate(this.x, this.y);
-    ctx.rotate(Math.PI);
     ctx.scale(this.size / 20, this.size / 20);
     ctx.beginPath();
     ctx.moveTo(0, 0);
