@@ -1,0 +1,54 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: white;
+  font-family: 'Comic Sans MS', cursive;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+  cursor: pointer;
+}
+
+canvas {
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 1;
+  display: none;
+  width: 100vw;
+  height: 100vh;
+}
+
+#startButton {
+  z-index: 3;
+  font-size: 6vw;
+  padding: 12px 24px;
+  background-color: #ff4081;
+  color: white;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0 0 15px #ff4081;
+  cursor: pointer;
+  animation: pulse 1.5s infinite;
+}
+
+#mensagem {
+  position: absolute;
+  font-size: 36px;
+  color: #ff4081;
+  z-index: 3;  /* ← Mudar de 2 para 3 */
+  display: none;
+  animation: pulse 2s ease;
+  pointer-events: none;
+  white-space: nowrap;
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.1); }
+  100% { transform: scale(1); }
+}
