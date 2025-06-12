@@ -28,16 +28,67 @@ const fotos = [
   "img04.jpg", "img05.jpg", "img06.jpg", "img07.jpg"
 ];
 
-const fotoElement = document.createElement('img');
+const fotoElement = document.createElement('div');
 fotoElement.style.position = 'absolute';
 fotoElement.style.width = '120px';
 fotoElement.style.height = '110px';
 fotoElement.style.display = 'none';
-fotoElement.style.zIndex = '2';
+fotoElement.style.zIndex = '1';
 fotoElement.style.pointerEvents = 'none';
 fotoElement.style.transformOrigin = 'center';
 
-fotoElement.className = 'heart-photo';
+const style = document.createElement('style');
+style.textContent = `
+  .heart-photo {
+    position: relative;
+    width: 120px;
+    height: 110px;
+    transform: rotate(-45deg);
+    /* ESCONDE o background do elemento principal - só os pseudo-elementos vão aparecer */
+    background: transparent !important;
+    filter: drop-shadow(0 0 15px #ff4081);
+    animation: heartPulse 2s ease-in-out infinite;
+  }
+  
+  .heart-photo:before,
+  .heart-photo:after {
+    content: '';
+    width: 60px;
+    height: 90px;
+    position: absolute;
+    left: 60px;
+    top: 0;
+    /* AQUI é onde a imagem aparece - usando variável CSS */
+    background-image: var(--heart-image);
+    background-size: cover !important;
+    background-position: center !important;
+    border-radius: 60px 60px 0 0;
+    transform: rotate(-45deg);
+    transform-origin: 0 100%;
+    filter: brightness(1.1);
+  }
+  
+  .heart-photo:after {
+    left: 0;
+    transform: rotate(45deg);
+    transform-origin: 100% 100%;
+  }
+
+  @keyframes heartPulse {
+    0%, 100% { 
+      transform: rotate(-45deg) scale(1); 
+    }
+    50% { 
+      transform: rotate(-45deg) scale(1.05); 
+    }
+  }
+
+  .heart-photo:hover {
+    filter: drop-shadow(0 0 25px #ff4081);
+    transform: rotate(-45deg) scale(1.1);
+  }
+`;
+document.head.appendChild(style);
 document.body.appendChild(fotoElement);
 
 startButton.addEventListener("click", () => {
@@ -46,6 +97,7 @@ startButton.addEventListener("click", () => {
   ativarToque();
 });
 
+// Atualizar canvas quando a tela mudar de tamanho (responsivo)
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
@@ -73,20 +125,26 @@ function ativarToque() {
     mensagem.style.display = "block";
 
     const fotoAleatoria = fotos[Math.floor(Math.random() * fotos.length)];
-    fotoElement.src = fotoAleatoria;
-
+    fotoElement.className = 'heart-photo';
+    // Define a imagem nos pseudo-elementos através de uma variável CSS
+    fotoElement.style.setProperty('--heart-image', `url(${fotoAleatoria})`);
+    
+    // Posição mais próxima do clique para melhor visualização
     const offsetX = (Math.random() - 0.5) * 150;
     const offsetY = (Math.random() - 0.5) * 150;
     fotoElement.style.left = `${x + offsetX}px`;
     fotoElement.style.top = `${y + offsetY}px`;
-    fotoElement.style.transform = "translate(-50%, -50%) scale(0.5)";
-    fotoElement.style.opacity = '0';
+    fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg)";
     fotoElement.style.display = "block";
 
+    // Efeito de entrada suave
+    fotoElement.style.opacity = '0';
+    fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.5)";
+    
     setTimeout(() => {
       fotoElement.style.transition = 'all 0.3s ease-out';
       fotoElement.style.opacity = '1';
-      fotoElement.style.transform = "translate(-50%, -50%) scale(1)";
+      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(1)";
     }, 50);
 
     timeoutAtual = setTimeout(() => {
@@ -95,18 +153,20 @@ function ativarToque() {
     }, 4000);
 
     timeoutFoto = setTimeout(() => {
+      // Efeito de saída suave
       fotoElement.style.transition = 'all 0.3s ease-in';
       fotoElement.style.opacity = '0';
-      fotoElement.style.transform = "translate(-50%, -50%) scale(0.8)";
-
+      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.8)";
+      
       setTimeout(() => {
         fotoElement.style.display = "none";
         fotoElement.style.transition = '';
       }, 300);
-
+      
       timeoutFoto = null;
     }, 4000);
 
+    // 💥 Boom de corações no clique
     for (let i = 0; i < 20; i++) {
       particles.push(new HeartParticle(false, x, y));
     }
@@ -165,6 +225,7 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
+// Corações de fundo contínuos
 setInterval(() => {
   for (let i = 0; i < 5; i++) {
     particles.push(new HeartParticle(true));
