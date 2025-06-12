@@ -44,9 +44,9 @@ style.textContent = `
     width: 120px;
     height: 110px;
     transform: rotate(-45deg);
-    background-size: cover !important;
-    background-position: center !important;
-    filter: drop-shadow(0 0 15px #ff4081) brightness(1.1);
+    /* ESCONDE o background do elemento principal - só os pseudo-elementos vão aparecer */
+    background: transparent !important;
+    filter: drop-shadow(0 0 15px #ff4081);
     animation: heartPulse 2s ease-in-out infinite;
   }
   
@@ -58,13 +58,14 @@ style.textContent = `
     position: absolute;
     left: 60px;
     top: 0;
-    background: inherit;
-    background-size: inherit !important;
-    background-position: inherit !important;
+    /* AQUI é onde a imagem aparece - usando variável CSS */
+    background-image: var(--heart-image);
+    background-size: cover !important;
+    background-position: center !important;
     border-radius: 60px 60px 0 0;
     transform: rotate(-45deg);
     transform-origin: 0 100%;
-    box-shadow: inset 0 0 20px rgba(255, 64, 129, 0.3);
+    filter: brightness(1.1);
   }
   
   .heart-photo:after {
@@ -83,7 +84,7 @@ style.textContent = `
   }
 
   .heart-photo:hover {
-    filter: drop-shadow(0 0 25px #ff4081) brightness(1.2);
+    filter: drop-shadow(0 0 25px #ff4081);
     transform: rotate(-45deg) scale(1.1);
   }
 `;
@@ -124,8 +125,9 @@ function ativarToque() {
     mensagem.style.display = "block";
 
     const fotoAleatoria = fotos[Math.floor(Math.random() * fotos.length)];
-    fotoElement.style.backgroundImage = `url(${fotoAleatoria})`;
     fotoElement.className = 'heart-photo';
+    // Define a imagem nos pseudo-elementos através de uma variável CSS
+    fotoElement.style.setProperty('--heart-image', `url(${fotoAleatoria})`);
     
     // Posição mais próxima do clique para melhor visualização
     const offsetX = (Math.random() - 0.5) * 150;
