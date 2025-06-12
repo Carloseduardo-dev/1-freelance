@@ -14,13 +14,13 @@ let timeoutFoto = null;
 
 const frases = [
   "O teu sorriso é onde<br>meu mundo começa🥰💗",
-  "Se for pra viver<br>que seja contigo até o<br>fim e depois💖",
-  "Te encontrar foi como<br>achar poesia onde só havia silêncio💘",
-  "Se eu pudesse escolher de novo<br>escolheria você mil vezes<br>sem pausa💞",
-  "No jogo da vida<br>só quero passar de<br>fase contigo💑",
+  "Se for pra viver<br>que seja contigo até o<br>fim e depois💖",
+  "Te encontrar foi como<br>achar poesia onde só havia silêncio💘",
+  "Se eu pudesse escolher de novo<br>escolheria você mil vezes<br>sem pausa💞",
+  "No jogo da vida<br>só quero passar de<br>fase contigo💑",
   "Feliz Dia dos Namorados 💖",
-  "Você me olhou<br>Gaga cantou o mundo sumiu<br>Eu fiquei em você❤️",
-  "Meu prato preferido<br>fica completo<br> só com você<br>do meu lado💕"
+  "Você me olhou<br>Gaga cantou o mundo sumiu<br>Eu fiquei em você❤️",
+  "Meu prato preferido<br>fica completo<br> só com você<br>do meu lado💕"
 ];
 
 const fotos = [
@@ -30,8 +30,8 @@ const fotos = [
 
 const fotoElement = document.createElement('div');
 fotoElement.style.position = 'absolute';
-fotoElement.style.width = '100px';
-fotoElement.style.height = '90px';
+fotoElement.style.width = '120px';
+fotoElement.style.height = '110px';
 fotoElement.style.display = 'none';
 fotoElement.style.zIndex = '1';
 fotoElement.style.pointerEvents = 'none';
@@ -41,32 +41,50 @@ const style = document.createElement('style');
 style.textContent = `
   .heart-photo {
     position: relative;
-    width: 100px;
-    height: 90px;
+    width: 120px;
+    height: 110px;
     transform: rotate(-45deg);
     background-size: cover !important;
     background-position: center !important;
-    filter: drop-shadow(0 0 10px #ff4081);
+    filter: drop-shadow(0 0 15px #ff4081) brightness(1.1);
+    animation: heartPulse 2s ease-in-out infinite;
   }
+  
   .heart-photo:before,
   .heart-photo:after {
     content: '';
-    width: 52px;
-    height: 80px;
+    width: 60px;
+    height: 90px;
     position: absolute;
-    left: 50px;
+    left: 60px;
     top: 0;
     background: inherit;
     background-size: inherit !important;
     background-position: inherit !important;
-    border-radius: 50px 50px 0 0;
+    border-radius: 60px 60px 0 0;
     transform: rotate(-45deg);
     transform-origin: 0 100%;
+    box-shadow: inset 0 0 20px rgba(255, 64, 129, 0.3);
   }
+  
   .heart-photo:after {
     left: 0;
     transform: rotate(45deg);
     transform-origin: 100% 100%;
+  }
+
+  @keyframes heartPulse {
+    0%, 100% { 
+      transform: rotate(-45deg) scale(1); 
+    }
+    50% { 
+      transform: rotate(-45deg) scale(1.05); 
+    }
+  }
+
+  .heart-photo:hover {
+    filter: drop-shadow(0 0 25px #ff4081) brightness(1.2);
+    transform: rotate(-45deg) scale(1.1);
   }
 `;
 document.head.appendChild(style);
@@ -108,12 +126,24 @@ function ativarToque() {
     const fotoAleatoria = fotos[Math.floor(Math.random() * fotos.length)];
     fotoElement.style.backgroundImage = `url(${fotoAleatoria})`;
     fotoElement.className = 'heart-photo';
-    const offsetX = (Math.random() - 0.5) * 200;
-    const offsetY = (Math.random() - 0.5) * 200;
+    
+    // Posição mais próxima do clique para melhor visualização
+    const offsetX = (Math.random() - 0.5) * 150;
+    const offsetY = (Math.random() - 0.5) * 150;
     fotoElement.style.left = `${x + offsetX}px`;
     fotoElement.style.top = `${y + offsetY}px`;
     fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg)";
     fotoElement.style.display = "block";
+
+    // Efeito de entrada suave
+    fotoElement.style.opacity = '0';
+    fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.5)";
+    
+    setTimeout(() => {
+      fotoElement.style.transition = 'all 0.3s ease-out';
+      fotoElement.style.opacity = '1';
+      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(1)";
+    }, 50);
 
     timeoutAtual = setTimeout(() => {
       mensagem.style.display = "none";
@@ -121,7 +151,16 @@ function ativarToque() {
     }, 4000);
 
     timeoutFoto = setTimeout(() => {
-      fotoElement.style.display = "none";
+      // Efeito de saída suave
+      fotoElement.style.transition = 'all 0.3s ease-in';
+      fotoElement.style.opacity = '0';
+      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.8)";
+      
+      setTimeout(() => {
+        fotoElement.style.display = "none";
+        fotoElement.style.transition = '';
+      }, 300);
+      
       timeoutFoto = null;
     }, 4000);
 
