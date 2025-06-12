@@ -10,7 +10,7 @@ canvas.height = window.innerHeight;
 let particles = [];
 let musicaTocando = false;
 let timeoutAtual = null;
-let heartPhotos = []; // Array para controlar as fotos em coração
+let timeoutFoto = null;
 
 const frases = [
   "O teu sorriso é onde<br>meu mundo começa🥰💗",
@@ -28,6 +28,18 @@ const fotos = [
   "img04.jpg", "img05.jpg", "img06.jpg", "img07.jpg"
 ];
 
+const fotoElement = document.createElement('img');
+fotoElement.style.position = 'absolute';
+fotoElement.style.width = '120px';
+fotoElement.style.height = '110px';
+fotoElement.style.display = 'none';
+fotoElement.style.zIndex = '2';
+fotoElement.style.pointerEvents = 'none';
+fotoElement.style.transformOrigin = 'center';
+
+fotoElement.className = 'heart-photo';
+document.body.appendChild(fotoElement);
+
 startButton.addEventListener("click", () => {
   startButton.style.display = "none";
   canvas.style.display = "block";
@@ -39,89 +51,6 @@ window.addEventListener("resize", () => {
   canvas.height = window.innerHeight;
 });
 
-// Função para desenhar coração com imagem no canvas
-function drawHeartWithImage(x, y, size, image, alpha = 1) {
-  ctx.save();
-  ctx.globalAlpha = alpha;
-  ctx.translate(x, y);
-  ctx.scale(size / 100, size / 100);
-  
-  // Criar máscara do coração
-  ctx.beginPath();
-  ctx.moveTo(0, 0);
-  ctx.bezierCurveTo(0, -30, -50, -30, -50, 0);
-  ctx.bezierCurveTo(-50, 0, -50, 20, -25, 45);
-  ctx.lineTo(0, 70);
-  ctx.lineTo(25, 45);
-  ctx.bezierCurveTo(50, 20, 50, 0, 50, 0);
-  ctx.bezierCurveTo(50, -30, 0, -30, 0, 0);
-  ctx.closePath();
-  
-  // Aplicar máscara
-  ctx.clip();
-  
-  // Desenhar imagem dentro da máscara do coração
-  if (image && image.complete) {
-    ctx.drawImage(image, -60, -40, 120, 120);
-  }
-  
-  // Adicionar borda brilhante
-  ctx.globalCompositeOperation = 'source-over';
-  ctx.strokeStyle = '#ff4081';
-  ctx.lineWidth = 3;
-  ctx.shadowColor = '#ff4081';
-  ctx.shadowBlur = 10;
-  ctx.stroke();
-  
-  ctx.restore();
-}
-
-// Classe para foto em coração
-function HeartPhoto(x, y, imageSrc) {
-  this.x = x;
-  this.y = y;
-  this.size = 80;
-  this.alpha = 0;
-  this.targetAlpha = 1;
-  this.scale = 0.5;
-  this.targetScale = 1;
-  this.life = 0;
-  this.maxLife = 240; // 4 segundos a 60fps
-  
-  this.image = new Image();
-  this.image.src = imageSrc;
-  
-  this.update = function() {
-    this.life++;
-    
-    // Animação de entrada
-    if (this.life < 18) { // 0.3 segundos
-      this.alpha += (this.targetAlpha - this.alpha) * 0.15;
-      this.scale += (this.targetScale - this.scale) * 0.15;
-    }
-    
-    // Animação de saída
-    if (this.life > this.maxLife - 18) {
-      this.targetAlpha = 0;
-      this.targetScale = 0.8;
-      this.alpha += (this.targetAlpha - this.alpha) * 0.15;
-      this.scale += (this.targetScale - this.scale) * 0.15;
-    }
-    
-    // Pulsação suave
-    const pulse = Math.sin(this.life * 0.1) * 0.05 + 1;
-    this.currentSize = this.size * this.scale * pulse;
-  };
-  
-  this.draw = function() {
-    drawHeartWithImage(this.x, this.y, this.currentSize, this.image, this.alpha);
-  };
-  
-  this.isDead = function() {
-    return this.life > this.maxLife;
-  };
-}
-
 function ativarToque() {
   document.body.addEventListener("click", (event) => {
     if (!musicaTocando) {
@@ -131,6 +60,7 @@ function ativarToque() {
     }
 
     if (timeoutAtual) clearTimeout(timeoutAtual);
+    if (timeoutFoto) clearTimeout(timeoutFoto);
 
     const x = event.clientX;
     const y = event.clientY;
@@ -142,18 +72,41 @@ function ativarToque() {
     mensagem.style.transform = "translate(-50%, -50%)";
     mensagem.style.display = "block";
 
-    // Criar foto em coração no canvas
     const fotoAleatoria = fotos[Math.floor(Math.random() * fotos.length)];
-    const offsetX = (Math.random() - 0.5) * 200;
-    const offsetY = (Math.random() - 0.5) * 200;
-    heartPhotos.push(new HeartPhoto(x + offsetX, y + offsetY, fotoAleatoria));
+    fotoElement.src = fotoAleatoria;
+
+    const offsetX = (Math.random() - 0.5) * 150;
+    const offsetY = (Math.random() - 0.5) * 150;
+    fotoElement.style.left = `${x + offsetX}px`;
+    fotoElement.style.top = `${y + offsetY}px`;
+    fotoElement.style.transform = "translate(-50%, -50%) scale(0.5)";
+    fotoElement.style.opacity = '0';
+    fotoElement.style.display = "block";
+
+    setTimeout(() => {
+      fotoElement.style.transition = 'all 0.3s ease-out';
+      fotoElement.style.opacity = '1';
+      fotoElement.style.transform = "translate(-50%, -50%) scale(1)";
+    }, 50);
 
     timeoutAtual = setTimeout(() => {
       mensagem.style.display = "none";
       timeoutAtual = null;
     }, 4000);
 
-    // 💥 Boom de corações no clique
+    timeoutFoto = setTimeout(() => {
+      fotoElement.style.transition = 'all 0.3s ease-in';
+      fotoElement.style.opacity = '0';
+      fotoElement.style.transform = "translate(-50%, -50%) scale(0.8)";
+
+      setTimeout(() => {
+        fotoElement.style.display = "none";
+        fotoElement.style.transition = '';
+      }, 300);
+
+      timeoutFoto = null;
+    }, 4000);
+
     for (let i = 0; i < 20; i++) {
       particles.push(new HeartParticle(false, x, y));
     }
@@ -202,8 +155,6 @@ function getRandomRed() {
 
 function animate() {
   ctx.clearRect(0, 0, canvas.width, canvas.height);
-  
-  // Atualizar e desenhar corações animados
   particles.forEach((p, i) => {
     p.update();
     p.draw();
@@ -211,20 +162,9 @@ function animate() {
       particles.splice(i, 1);
     }
   });
-  
-  // Atualizar e desenhar fotos em coração
-  heartPhotos.forEach((hp, i) => {
-    hp.update();
-    hp.draw();
-    if (hp.isDead()) {
-      heartPhotos.splice(i, 1);
-    }
-  });
-  
   requestAnimationFrame(animate);
 }
 
-// Corações de fundo contínuos
 setInterval(() => {
   for (let i = 0; i < 5; i++) {
     particles.push(new HeartParticle(true));
