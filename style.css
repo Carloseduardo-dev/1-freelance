@@ -48,32 +48,61 @@ canvas {
   text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
 }
 
-/* 💖 Estilo atualizado para imagem com formato de coração real */
+/* Estilos específicos para o coração das fotos */
 .heart-photo {
-  position: absolute;
+  position: relative;
   width: 120px;
   height: 110px;
-  z-index: 3;
-  pointer-events: none;
-  object-fit: cover;
+  transform: rotate(-45deg);
+  background-size: cover !important;
+  background-position: center !important;
   filter: drop-shadow(0 0 15px #ff4081) brightness(1.1);
   animation: heartPulse 2s ease-in-out infinite;
-  clip-path: path("M60 110 C90 90 110 70 60 30 C10 70 30 90 60 110 Z");
-  transition: transform 0.3s ease, opacity 0.3s ease;
+  z-index: 3;
+  /* IMPORTANTE: Remove qualquer borda ou fundo que possa aparecer */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.heart-photo:before,
+.heart-photo:after {
+  content: '';
+  width: 60px;
+  height: 90px;
+  position: absolute;
+  left: 60px;
+  top: 0;
+  background: inherit;
+  background-size: inherit !important;
+  background-position: inherit !important;
+  border-radius: 60px 60px 0 0;
+  transform: rotate(-45deg);
+  transform-origin: 0 100%;
+  /* Remove qualquer borda dos pseudo-elementos */
+  border: none !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.heart-photo:after {
+  left: 0;
+  transform: rotate(45deg);
+  transform-origin: 100% 100%;
+}
+
+@keyframes heartPulse {
+  0%, 100% { 
+    transform: rotate(-45deg) scale(1); 
+  }
+  50% { 
+    transform: rotate(-45deg) scale(1.05); 
+  }
 }
 
 .heart-photo:hover {
   filter: drop-shadow(0 0 25px #ff4081) brightness(1.2);
-  transform: scale(1.1);
-}
-
-@keyframes heartPulse {
-  0%, 100% {
-    transform: scale(1);
-  }
-  50% {
-    transform: scale(1.05);
-  }
+  transform: rotate(-45deg) scale(1.1);
 }
 
 @keyframes pulse {
@@ -82,7 +111,13 @@ canvas {
   100% { transform: scale(1); }
 }
 
-/* Garantir que nada interfira nos elementos principais */
+/* Reset geral para garantir que nada interfira */
 * {
   box-sizing: border-box;
+}
+
+/* Esconde qualquer elemento que possa estar causando o quadrado */
+div:not(.heart-photo):not(#mensagem):not(#startButton) {
+  background: none !important;
+  border: none !important;
 }
