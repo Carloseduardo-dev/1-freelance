@@ -28,64 +28,57 @@ const fotos = [
   "img04.jpg", "img05.jpg", "img06.jpg", "img07.jpg"
 ];
 
+// Criar elemento para foto em coração
 const fotoElement = document.createElement('div');
 fotoElement.style.position = 'absolute';
-fotoElement.style.width = '120px';
-fotoElement.style.height = '110px';
 fotoElement.style.display = 'none';
-fotoElement.style.zIndex = '1';
+fotoElement.style.zIndex = '3';
 fotoElement.style.pointerEvents = 'none';
-fotoElement.style.transformOrigin = 'center';
 
+// CSS TOTALMENTE NOVO - sem conflitos
 const style = document.createElement('style');
 style.textContent = `
-  .heart-photo {
+  .heart-container {
     position: relative;
-    width: 120px;
-    height: 110px;
+    width: 100px;
+    height: 100px;
     transform: rotate(-45deg);
-    /* ESCONDE o background do elemento principal - só os pseudo-elementos vão aparecer */
-    background: transparent !important;
-    filter: drop-shadow(0 0 15px #ff4081);
-    animation: heartPulse 2s ease-in-out infinite;
   }
   
-  .heart-photo:before,
-  .heart-photo:after {
-    content: '';
-    width: 60px;
-    height: 90px;
+  .heart-left,
+  .heart-right {
     position: absolute;
-    left: 60px;
-    top: 0;
-    /* AQUI é onde a imagem aparece - usando variável CSS */
-    background-image: var(--heart-image);
-    background-size: cover !important;
-    background-position: center !important;
-    border-radius: 60px 60px 0 0;
-    transform: rotate(-45deg);
-    transform-origin: 0 100%;
-    filter: brightness(1.1);
+    width: 52px;
+    height: 80px;
+    background-size: cover;
+    background-position: center;
+    border-radius: 50px 50px 0 0;
+    filter: drop-shadow(0 0 10px #ff4081);
   }
   
-  .heart-photo:after {
+  .heart-left {
     left: 0;
-    transform: rotate(45deg);
+    transform: rotate(-45deg);
     transform-origin: 100% 100%;
   }
-
-  @keyframes heartPulse {
-    0%, 100% { 
-      transform: rotate(-45deg) scale(1); 
-    }
-    50% { 
-      transform: rotate(-45deg) scale(1.05); 
-    }
+  
+  .heart-right {
+    right: 0;
+    transform: rotate(45deg);
+    transform-origin: 0 100%;
   }
-
-  .heart-photo:hover {
-    filter: drop-shadow(0 0 25px #ff4081);
-    transform: rotate(-45deg) scale(1.1);
+  
+  .heart-container::before {
+    content: '';
+    position: absolute;
+    left: 25px;
+    top: 25px;
+    width: 50px;
+    height: 50px;
+    background: inherit;
+    background-size: cover;
+    background-position: center;
+    transform: rotate(45deg);
   }
 `;
 document.head.appendChild(style);
@@ -97,11 +90,62 @@ startButton.addEventListener("click", () => {
   ativarToque();
 });
 
-// Atualizar canvas quando a tela mudar de tamanho (responsivo)
 window.addEventListener("resize", () => {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
 });
+
+function criarCoracaoFoto(imagemUrl, x, y) {
+  // Remove foto anterior se existir
+  const fotoAnterior = document.querySelector('.heart-container');
+  if (fotoAnterior) {
+    fotoAnterior.remove();
+  }
+  
+  // Cria novo coração
+  const heartContainer = document.createElement('div');
+  heartContainer.className = 'heart-container';
+  heartContainer.style.position = 'absolute';
+  heartContainer.style.left = x + 'px';
+  heartContainer.style.top = y + 'px';
+  heartContainer.style.transform = 'translate(-50%, -50%) rotate(-45deg)';
+  heartContainer.style.zIndex = '3';
+  heartContainer.style.animation = 'heartPulse 2s ease-in-out infinite';
+  
+  // Criar as duas metades do coração
+  const heartLeft = document.createElement('div');
+  heartLeft.className = 'heart-left';
+  heartLeft.style.backgroundImage = `url(${imagemUrl})`;
+  
+  const heartRight = document.createElement('div');
+  heartRight.className = 'heart-right';
+  heartRight.style.backgroundImage = `url(${imagemUrl})`;
+  
+  heartContainer.appendChild(heartLeft);
+  heartContainer.appendChild(heartRight);
+  document.body.appendChild(heartContainer);
+  
+  // Remove após 4 segundos
+  setTimeout(() => {
+    if (heartContainer.parentNode) {
+      heartContainer.remove();
+    }
+  }, 4000);
+}
+
+// Adicionar animação do coração
+const pulseStyle = document.createElement('style');
+pulseStyle.textContent = `
+  @keyframes heartPulse {
+    0%, 100% { 
+      transform: translate(-50%, -50%) rotate(-45deg) scale(1); 
+    }
+    50% { 
+      transform: translate(-50%, -50%) rotate(-45deg) scale(1.1); 
+    }
+  }
+`;
+document.head.appendChild(pulseStyle);
 
 function ativarToque() {
   document.body.addEventListener("click", (event) => {
@@ -124,46 +168,15 @@ function ativarToque() {
     mensagem.style.transform = "translate(-50%, -50%)";
     mensagem.style.display = "block";
 
+    // Criar foto em coração com posição aleatória próxima ao clique
     const fotoAleatoria = fotos[Math.floor(Math.random() * fotos.length)];
-    fotoElement.className = 'heart-photo';
-    // Define a imagem nos pseudo-elementos através de uma variável CSS
-    fotoElement.style.setProperty('--heart-image', `url(${fotoAleatoria})`);
-    
-    // Posição mais próxima do clique para melhor visualização
-    const offsetX = (Math.random() - 0.5) * 150;
-    const offsetY = (Math.random() - 0.5) * 150;
-    fotoElement.style.left = `${x + offsetX}px`;
-    fotoElement.style.top = `${y + offsetY}px`;
-    fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg)";
-    fotoElement.style.display = "block";
-
-    // Efeito de entrada suave
-    fotoElement.style.opacity = '0';
-    fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.5)";
-    
-    setTimeout(() => {
-      fotoElement.style.transition = 'all 0.3s ease-out';
-      fotoElement.style.opacity = '1';
-      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(1)";
-    }, 50);
+    const offsetX = (Math.random() - 0.5) * 200;
+    const offsetY = (Math.random() - 0.5) * 200;
+    criarCoracaoFoto(fotoAleatoria, x + offsetX, y + offsetY);
 
     timeoutAtual = setTimeout(() => {
       mensagem.style.display = "none";
       timeoutAtual = null;
-    }, 4000);
-
-    timeoutFoto = setTimeout(() => {
-      // Efeito de saída suave
-      fotoElement.style.transition = 'all 0.3s ease-in';
-      fotoElement.style.opacity = '0';
-      fotoElement.style.transform = "translate(-50%, -50%) rotate(-45deg) scale(0.8)";
-      
-      setTimeout(() => {
-        fotoElement.style.display = "none";
-        fotoElement.style.transition = '';
-      }, 300);
-      
-      timeoutFoto = null;
     }, 4000);
 
     // 💥 Boom de corações no clique
